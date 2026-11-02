@@ -350,6 +350,31 @@ test("owner edits monthly allocations privately, finalizes them and keeps sign-i
   await expect(awards.getByLabel("Award for first-contributor")).toHaveValue(
     "1.8",
   );
+  // An ended session must not lend its local edits to a later signed-in owner.
+  for (const refusal of [401, 403]) {
+    status = refusal;
+    await load.click();
+    if (refusal === 401)
+      await expect(
+        awards.getByRole("link", { name: "Sign in with GitHub" }),
+      ).toBeVisible();
+    else
+      await expect(awards.getByRole("alert")).toContainText(
+        "maintainer authority",
+      );
+    status = 200;
+    await load.click();
+    await expect(awards.getByLabel("Award for first-contributor")).toHaveValue(
+      "1.23456789",
+    );
+    await expect(
+      awards.getByRole("button", {
+        name: "Save first-contributor",
+        exact: true,
+      }),
+    ).toBeDisabled();
+    await awards.getByLabel("Award for first-contributor").fill("1.8");
+  }
   // Another maintainer changes the underlying value before this owner refreshes.
   // The refreshed sequence must not authorize an old draft over that new value.
   allocations[0].grossBase = "1600000000";
