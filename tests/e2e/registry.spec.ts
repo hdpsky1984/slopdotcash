@@ -1703,6 +1703,7 @@ test("an owner installs Slopbot before creation and resumes setup; a failed scan
   await expect(resumed.getByRole("status")).toContainText(
     "Findings in the project repository block clearance.",
   );
+  await expect(resumed.getByText("Not cleared", { exact: true })).toBeVisible();
   await expectAccessible(page);
   await page.screenshot({
     path: test.info().outputPath("scan-findings.png"),
